@@ -4,3 +4,4 @@ using from './annotations-suppliers';
 using from './annotatuibs-companies';
 using from './annotations-organizations';
 using from './annotations-ordertypes';
+using from './annotations-groups';

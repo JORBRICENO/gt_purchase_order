@@ -3,9 +3,10 @@ const moment = require('moment');
 
 module.exports = class PurchaseOrder extends cds.ApplicationService {
 
-    init () {
+   async init () {
 
-        const {PurchaseOrder, PurchaseOrderItem} = this.entities;
+        const {PurchaseOrder, PurchaseOrderItem, VHE_Companies} = this.entities;
+        const api_company = await cds.connect.to("API_COMPANYCODE_SRV");
 
         //before
         //on
@@ -16,6 +17,15 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
         //UPDATE
         //DELETE
         //READ
+
+        this.on('READ', VHE_Companies, async (req) => {
+            return await api_company.tx(req).send({
+                query: req.query,
+                headers: {
+                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
+                }
+            })
+        });
 
         this.before('NEW', PurchaseOrder.drafts, async (req) => {
 

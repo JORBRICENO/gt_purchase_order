@@ -54,11 +54,18 @@ annotate pos.PurchaseOrder with {
         ValueList      : {
             $Type         : 'Common.ValueListType',
             CollectionPath: 'VH_Organizations',
-            Parameters    : [{
-                $Type            : 'Common.ValueListParameterInOut',
-                LocalDataProperty: PurchasingOrganization_ID,
-                ValueListProperty: 'ID'
-            }]
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterIn',
+                    LocalDataProperty: CompanyCode_ID,
+                    ValueListProperty: 'Company_ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterOut',
+                    LocalDataProperty : PurchasingOrganization_ID,
+                    ValueListProperty : 'ID'
+                }
+            ]
         }
     };
     PurchaseOrderType          @Common: {
@@ -74,19 +81,71 @@ annotate pos.PurchaseOrder with {
             }]
         }
     };
+    PurchasingGroup @Common: {
+        Text : PurchasingGroup.PurchasingGroup,
+        TextArrangement : #TextOnly,
+        ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'VH_Groups',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : PurchasingGroup_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'Description'
+                }
+            ]
+        }
+    };
+    // Category @Common: {
+    //     ValueList : {
+    //         $Type : 'Common.ValueListType',
+    //         CollectionPath : 'VH_Categories',
+    //         Parameters : [
+    //             {
+    //                 $Type : 'Common.ValueListParameterInOut',
+    //                 LocalDataProperty : Category_ID,
+    //                 ValueListProperty : 'ID'
+    //             },
+    //         ],
+    //     },
+    // };
+    // SubCategory @Common : { 
+    //     ValueList : {
+    //         $Type : 'Common.ValueListType',
+    //         CollectionPath : 'VH_SubCategories',
+    //         Parameters : [
+    //            {
+    //                $Type : 'Common.ValueListParameterIn',
+    //                LocalDataProperty : Category_ID,
+    //                ValueListProperty : 'Category_ID'
+    //            },
+    //            {
+    //                $Type : 'Common.ValueListParameterOut',
+    //                LocalDataProperty : SubCategory_ID,
+    //                ValueListProperty : 'ID'
+    //            }
+    //         ]
+    //     }
+    //  }
 };
 
 
 annotate pos.PurchaseOrder with @(
     UI.SelectionFields               : [
+        CompanyCode_ID,
+        PurchasingOrganization_ID,
         PurchaseOrder,
         PurchaseOrderType_ID,
-        PurchasingOrganization_ID,
-        CompanyCode_ID,
         Supplier_ID,
         Language_code,
         DocumentCurrency_code,
-        PurchasingProcessingStatus_code
+        PurchasingProcessingStatus_code,
+        Category_ID,
+        SubCategory_ID
     ],
     UI.HeaderInfo                    : {
         $Type         : 'UI.HeaderInfoType',
@@ -173,7 +232,7 @@ annotate pos.PurchaseOrder with @(
             },
             {
                 $Type: 'UI.DataField',
-                Value: PurchasingGroup
+                Value: PurchasingGroup_ID
             }
         ],
     },
