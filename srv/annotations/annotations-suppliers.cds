@@ -1,9 +1,6 @@
 using {PurchaseOrder} from '../service';
 
-annotate PurchaseOrder.VH_Suppliers with {
+annotate PurchaseOrder.VHE_Suppliers with {
     @title : 'Suppliers'
-    ID @Common: {
-        Text : SupplierName,
-        TextArrangement : #TextOnly
-    }
+    Supplier;
 };

@@ -8,15 +8,21 @@ using {
     sap.common.Currencies
 } from '@sap/cds/common';
 
+using {API_COMPANYCODE_SRV as Company} from '../srv/external/API_COMPANYCODE_SRV';
+using {CE_PURCHASINGORGANIZATION_0001 as Organization} from '../srv/external/CE_PURCHASINGORGANIZATION_0001';
+using {API_BUSINESS_PARTNER as BusinessPartner} from '../srv/external/API_BUSINESS_PARTNER';
 entity PurchaseOrderHeader : cuid, managed {
     key PurchaseOrder              : String(10) @Core.Computed: true;
-        CompanyCode                : Association to Companies;
-        PurchasingOrganization     : Association to Organizations;
+        CompanyCode                : Association to Company.A_CompanyCode; //CompanyCode & CompanyCode_CompanyCode
+        CompanyName                : String(25);
+        PurchasingOrganization     : Association to Organization.A_PurchasingOrganization;  //PurchasingOrganization & PurchasingOrganization_PurchasingOrganization
+        PurchasingOrganizationName : String(20);
+        PurchasingGroup            : Association to Groups; //PurchasingGroup & PurchasingGroup_ID
         PurchaseOrderType          : Association to OrderTypes; //PurchaseOrderType & PurchaseOrderType_ID
-        Supplier                   : Association to Suppliers;
+        Supplier                   : Association to BusinessPartner.A_SupplierPurchasingOrg;    //Supplier & Supplier_Supplier
+        SupplierName : String(80);
         Language                   : Association to Languages default 'EN'; //Language_code (EN,ES,...)
         PurchaseOrderDate          : Date;
-        PurchasingGroup            : Association to Groups; //PurchasingGroup & PurchasingGroup_ID
         DocumentCurrency           : Association to Currencies default 'USD'; //DocumentCurrency_code (EUR,USD,COP,VES,...)
         PurchasingProcessingStatus : Association to OverallStatus; //OverallStatus_code
         // Category                   : Association to Categories;

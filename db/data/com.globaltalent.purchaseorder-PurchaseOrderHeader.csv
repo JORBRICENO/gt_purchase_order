@@ -1,2 +1,2 @@
-ID,PurchaseOrder,PurchaseOrderType_ID,PurchasingOrganization_ID,CompanyCode_ID,Supplier_ID,Language_code,PurchaseOrderDate,PurchasingGroup_ID,DocumentCurrency_code,PurchasingProcessingStatus_code
-550e8400-e29b-41d4-a716-446655440000,4500000001,1db422bf-f051-4212-959c-903abace8d4d,d3c3f3e2-3c4d-6e5f-0a1b-323456789001,c2b2e2d1-2b3c-5d4e-9f0a-223456789002,b1a1e1c0-1a2b-4c3d-8e9f-123456789005,EN,2025-09-20,a1b2c3d4-e5f6-4711-8001-000000000001,USD,A
+ID,PurchaseOrder,PurchaseOrderType_ID,PurchasingOrganization_PurchasingOrganization,CompanyCode_CompanyCode,Supplier_Supplier,Language_code,PurchaseOrderDate,PurchasingGroup_ID,DocumentCurrency_code,PurchasingProcessingStatus_code
+550e8400-e29b-41d4-a716-446655440000,4500000001,1db422bf-f051-4212-959c-903abace8d4d,1010,1010,1000032,EN,2025-09-20,a1b2c3d4-e5f6-4711-8001-000000000001,USD,A

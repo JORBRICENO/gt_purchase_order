@@ -5,8 +5,17 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
 
    async init () {
 
-        const {PurchaseOrder, PurchaseOrderItem, VHE_Companies} = this.entities;
+        const {
+            PurchaseOrder, 
+            PurchaseOrderItem, 
+            VHE_Companies,
+            VHE_Organizations,
+            VHE_Suppliers
+        } = this.entities;
+        
         const api_company = await cds.connect.to("API_COMPANYCODE_SRV");
+        const api_org = await cds.connect.to("CE_PURCHASINGORGANIZATION_0001");
+        const api_supplier = await cds.connect.to("API_BUSINESS_PARTNER");
 
         //before
         //on
@@ -20,6 +29,24 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
 
         this.on('READ', VHE_Companies, async (req) => {
             return await api_company.tx(req).send({
+                query: req.query,
+                headers: {
+                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
+                }
+            })
+        });
+
+        this.on('READ', VHE_Organizations, async (req) => {
+            return await api_org.tx(req).send({
+                query: req.query,
+                headers: {
+                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
+                }
+            })
+        });
+
+        this.on('READ', VHE_Suppliers, async (req) => {
+            return await api_supplier.tx(req).send({
                 query: req.query,
                 headers: {
                     apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
