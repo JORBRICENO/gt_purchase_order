@@ -1,11 +1,10 @@
 using {PurchaseOrder} from '../service';
 
 
-annotate PurchaseOrder.VH_Groups with {
+annotate PurchaseOrder.VHE_Groups with {
     @title : 'Groups'
-    ID @Common: {
-        Text : PurchasingGroup,
+    PurchasingGroup @Common: {
+        Text : PurchasingGroupName,
         TextArrangement : #TextOnly
     };
-    PurchasingGroup @title : 'Group'
 };

@@ -10,12 +10,16 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             PurchaseOrderItem, 
             VHE_Companies,
             VHE_Organizations,
+            VHE_Groups,
+            VHE_PurchaseOrderTypes,
             VHE_Suppliers
         } = this.entities;
         
         const api_company = await cds.connect.to("API_COMPANYCODE_SRV");
         const api_org = await cds.connect.to("CE_PURCHASINGORGANIZATION_0001");
         const api_supplier = await cds.connect.to("API_BUSINESS_PARTNER");
+        const api_group = await cds.connect.to("CE_PURCHASINGGROUP_0001");
+        const api_purchordrtype = await cds.connect.to("ZCE_PURCHASEORDERTYPE");
 
         //before
         //on
@@ -46,10 +50,62 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
         });
 
         this.on('READ', VHE_Suppliers, async (req) => {
-            return await api_supplier.tx(req).send({
+
+            const filter = req.query.SELECT.where;
+            let purchaseingOrg = '';
+
+            if (filter) {
+                purchaseingOrg = filter[2]?.val;
+            }
+
+            if (!purchaseingOrg) {
+                return [];
+            }
+
+            //1010
+
+            const supplierQuery = SELECT.from('API_BUSINESS_PARTNER.A_SupplierPurchasingOrg')
+                                .columns('Supplier')
+                                .where({PurchasingOrganization:purchaseingOrg});
+            const supplierResults = await api_supplier.run(supplierQuery);
+            console.log(supplierResults);
+
+            if (supplierResults.length === 0) {
+                return [];
+            }
+
+            const uniqueSupplierIDs = [...new Set(supplierResults.map(s => s.Supplier))];
+            console.log(uniqueSupplierIDs);
+
+            const supplierDetailsQuery = SELECT.from('API_BUSINESS_PARTNER.A_Supplier', supplier => {
+                supplier.Supplier,
+                supplier.SupplierName
+            }).where({Supplier: {in : uniqueSupplierIDs}});
+
+            const aSuppliers = await api_supplier.run(supplierDetailsQuery);
+
+            return aSuppliers.map(supplier => ({
+                Supplier : supplier.Supplier,
+                SupplierName : supplier.SupplierName,
+                PurchasingOrganization : purchaseingOrg
+            }));
+            
+        });
+
+        this.on('READ', VHE_Groups, async (req) => {
+            return await api_group.tx(req).send({
                 query: req.query,
                 headers: {
                     apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
+                }
+            })
+        });
+
+        this.on('READ', VHE_PurchaseOrderTypes, async (req) => {
+            return await api_purchordrtype.tx(req).send({
+                query: req.query,
+                headers: {
+                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
                 }
             })
         });

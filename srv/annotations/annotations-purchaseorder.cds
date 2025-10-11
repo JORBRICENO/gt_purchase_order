@@ -68,29 +68,27 @@ annotate pos.PurchaseOrder with {
         }
     };
     PurchaseOrderType          @Common: {
-        Text           : PurchaseOrderType.Description,
-        TextArrangement: #TextOnly,
         ValueList      : {
             $Type         : 'Common.ValueListType',
-            CollectionPath: 'VH_OrderTypes',
+            CollectionPath: 'VHE_PurchaseOrderTypes',
             Parameters    : [{
                 $Type            : 'Common.ValueListParameterInOut',
-                LocalDataProperty: PurchaseOrderType_ID,
-                ValueListProperty: 'ID'
+                LocalDataProperty: PurchaseOrderType_PurchaseOrderType,
+                ValueListProperty: 'PurchaseOrderType'
             }]
         }
     };
     PurchasingGroup @Common: {
-        Text : PurchasingGroup.PurchasingGroup,
+        Text : PurchasingGroupName,
         TextArrangement : #TextOnly,
         ValueList : {
             $Type : 'Common.ValueListType',
-            CollectionPath : 'VH_Groups',
+            CollectionPath : 'VHE_Groups',
             Parameters : [
                 {
                     $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : PurchasingGroup_ID,
-                    ValueListProperty : 'ID'
+                    LocalDataProperty : PurchasingGroup_PurchasingGroup,
+                    ValueListProperty : 'PurchasingGroup'
                 },
                 {
                     $Type : 'Common.ValueListParameterDisplayOnly',
@@ -103,11 +101,22 @@ annotate pos.PurchaseOrder with {
         ValueList      : {
             $Type         : 'Common.ValueListType',
             CollectionPath: 'VHE_Suppliers',
-            Parameters    : [{
-                $Type            : 'Common.ValueListParameterInOut',
-                LocalDataProperty: Supplier_Supplier,
-                ValueListProperty: 'Supplier'
-            }]
+            Parameters    : [
+                {
+                    $Type : 'Common.ValueListParameterIn',
+                    LocalDataProperty : PurchasingOrganization_PurchasingOrganization,
+                    ValueListProperty : 'PurchasingOrganization'
+                },
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : Supplier_Supplier,
+                    ValueListProperty : 'Supplier'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'SupplierName'
+                }
+            ]
         },
     };
     // Category @Common: {
@@ -146,10 +155,11 @@ annotate pos.PurchaseOrder with {
 
 annotate pos.PurchaseOrder with @(
     UI.SelectionFields               : [
+        PurchaseOrder,
         CompanyCode_CompanyCode,
         PurchasingOrganization_PurchasingOrganization,
-        PurchaseOrder,
-        PurchaseOrderType_ID,
+        PurchasingGroup_PurchasingGroup,
+        PurchaseOrderType_PurchaseOrderType,
         Supplier_Supplier,
         Language_code,
         DocumentCurrency_code,
@@ -181,7 +191,7 @@ annotate pos.PurchaseOrder with @(
         },
         {
             $Type             : 'UI.DataField',
-            Value             : PurchaseOrderType_ID,
+            Value             : PurchaseOrderType_PurchaseOrderType,
             @HTML5.CssDefaults: {
                 $Type: 'HTML5.CssDefaultsType',
                 width: '12rem'
@@ -242,7 +252,7 @@ annotate pos.PurchaseOrder with @(
             },
             {
                 $Type: 'UI.DataField',
-                Value: PurchasingGroup_ID
+                Value: PurchasingGroup_PurchasingGroup
             }
         ],
     },
@@ -255,7 +265,7 @@ annotate pos.PurchaseOrder with @(
             },
             {
                 $Type: 'UI.DataField',
-                Value: PurchaseOrderType_ID
+                Value: PurchaseOrderType_PurchaseOrderType
             },
             {
                 $Type: 'UI.DataField',

@@ -1,9 +1,6 @@
 using {PurchaseOrder} from '../service';
 
-annotate PurchaseOrder.VH_OrderTypes with {
-    @title : 'Order Types'
-    ID @Common: {
-        Text : Description,
-        TextArrangement :  #TextOnly
-    }
+annotate PurchaseOrder.VHE_PurchaseOrderTypes with {
+    @title : 'Purchase Order Types'
+    PurchaseOrderType;
 };

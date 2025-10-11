@@ -43,7 +43,24 @@
         "kind": "odata-v2",
         "model": "srv/external/API_BUSINESS_PARTNER",
         "credentials": {
-          "url":"https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_BUSINESS_PARTNER"
+          "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_BUSINESS_PARTNER",
+          "headers": {
+            "apikey":"MatGW3Mzcozw8FjoqggdaNAzYc7koHho"
+          }
+        }
+      },
+      "CE_PURCHASINGGROUP_0001": {
+        "kind": "odata",
+        "model": "srv/external/CE_PURCHASINGGROUP_0001",
+        "credentials": {
+          "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata4/sap/api_purchasinggroup/srvd_a2x/sap/purchasinggroup/0001"
+        }
+      },
+      "ZCE_PURCHASEORDERTYPE": {
+        "kind": "odata-v2",
+        "model": "srv/external/ZCE_PURCHASEORDERTYPE",
+        "credentials": {
+          "url":"http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/ZCE_PURCHASEORDERTYPE"
         }
       }
     }
