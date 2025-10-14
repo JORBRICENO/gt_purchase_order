@@ -13,6 +13,8 @@ using {CE_PURCHASINGORGANIZATION_0001 as Organization} from '../srv/external/CE_
 using {API_BUSINESS_PARTNER as BusinessPartner} from '../srv/external/API_BUSINESS_PARTNER';
 using {CE_PURCHASINGGROUP_0001 as Group} from '../srv/external/CE_PURCHASINGGROUP_0001';
 using {ZCE_PURCHASEORDERTYPE as PurchaseOrderType} from '../srv/external/ZCE_PURCHASEORDERTYPE';
+using {API_PLANT_SRV as Plant} from '../srv/external/API_PLANT_SRV';
+using {API_STORAGELOCATION_SRV as StorageLocation} from '../srv/external/API_STORAGELOCATION_SRV';
 
 entity PurchaseOrderHeader : cuid, managed {
     key PurchaseOrder              : String(10) @Core.Computed: true;
@@ -37,20 +39,25 @@ entity PurchaseOrderHeader : cuid, managed {
 };
 
 entity PurchaseOrderItem : cuid {
-    key PurchaseOrderItem     : String(5);
-        PurchaseOrderItemText : String(40);
-        Plant                 : String(4);
-        StorageLocation       : String(4);
-        Customer              : String(10);
-        Material              : String(40);
-        MaterialGroup         : String(9);
-        ProductType           : String(2);
-        NetPriceQuantity      : Decimal(12, 3);
-        NetPriceAmount        : Decimal(5, 0);
-        OrderQuantity         : Decimal(13, 2);
-        OrderPriceUnit        : String(3);
-        DocumentCurrency      : Association to Currencies;
-        PurchaseOrder         : Association to PurchaseOrderHeader; //PurchaseOrder_ID & PurchaseOrder_PurchaseOrder
+    key PurchaseOrderItem         : String(5);
+        PurchaseOrderItemText     : String(40);
+        Plant                     : Association to Plant.A_Plant;
+        PlantName                 : String(30);
+        StorageLocation           : Association to StorageLocation.StorageLocation;
+        StorageLocationName       : String(16);
+        //CompanyCode              : String(10);
+        Material                  : String(40);
+        MaterialName              : String;
+        MaterialGroup             : String(9);
+        ProductType               : String(2);
+        NetPriceQuantity          : Decimal(12, 3);
+        OrderPriceUnit            : String(3);
+        NetPriceAmount            : Decimal(5, 0);
+        DocumentCurrency          : Association to Currencies;
+        OrderQuantity             : Decimal(13, 2);
+        PurchaseOrderQuantityUnit : String(3);
+        TaxCode                   : String(2);
+        PurchaseOrder             : Association to PurchaseOrderHeader; //PurchaseOrder_ID & PurchaseOrder_PurchaseOrder
 };
 
 
@@ -64,33 +71,33 @@ entity OverallStatus : CodeList {
         criticality : Integer;
 };
 
-entity Companies : cuid {
-    CompanyCode     : String(4);
-    Description     : String(80);
-    toOrganizations : Composition of many Organizations
-                          on toOrganizations.Company = $self;
-};
+// entity Companies : cuid {
+//     CompanyCode     : String(4);
+//     Description     : String(80);
+//     toOrganizations : Composition of many Organizations
+//                           on toOrganizations.Company = $self;
+// };
 
-entity Organizations : cuid {
-    PurchasingOrganization : String(4);
-    Description            : String(80);
-    Company                : Association to Companies;
-};
+// entity Organizations : cuid {
+//     PurchasingOrganization : String(4);
+//     Description            : String(80);
+//     Company                : Association to Companies;
+// };
 
-entity OrderTypes : cuid {
-    PurchaseOrderType : String(4);
-    Description       : String(80);
-};
+// entity OrderTypes : cuid {
+//     PurchaseOrderType : String(4);
+//     Description       : String(80);
+// };
 
-entity Suppliers : cuid {
-    Supplier     : String(10);
-    SupplierName : String(80);
-};
+// entity Suppliers : cuid {
+//     Supplier     : String(10);
+//     SupplierName : String(80);
+// };
 
-entity Groups : cuid {
-    PurchasingGroup : String(3);
-    Description     : String(80);
-};
+// entity Groups : cuid {
+//     PurchasingGroup : String(3);
+//     Description     : String(80);
+// };
 
 // entity Categories : cuid {
 //     Category        : String(40);

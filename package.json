@@ -45,7 +45,7 @@
         "credentials": {
           "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_BUSINESS_PARTNER",
           "headers": {
-            "apikey":"MatGW3Mzcozw8FjoqggdaNAzYc7koHho"
+            "apikey": "MatGW3Mzcozw8FjoqggdaNAzYc7koHho"
           }
         }
       },
@@ -60,7 +60,21 @@
         "kind": "odata-v2",
         "model": "srv/external/ZCE_PURCHASEORDERTYPE",
         "credentials": {
-          "url":"http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/ZCE_PURCHASEORDERTYPE"
+          "url": "http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/ZCE_PURCHASEORDERTYPE"
+        }
+      },
+      "API_PLANT_SRV": {
+        "kind": "odata-v2",
+        "model": "srv/external/API_PLANT_SRV",
+        "credentials": {
+          "url": "http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/API_PLANT_SRV"
+        }
+      },
+      "API_STORAGELOCATION_SRV": {
+        "kind": "odata-v2",
+        "model": "srv/external/API_STORAGELOCATION_SRV",
+        "credentials": {
+          "url": "http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/API_STORAGELOCATION_SRV"
         }
       }
     }

@@ -5,6 +5,8 @@ using {CE_PURCHASINGORGANIZATION_0001 as Organization} from './external/CE_PURCH
 using {API_BUSINESS_PARTNER as BusinessPartner} from './external/API_BUSINESS_PARTNER';
 using {CE_PURCHASINGGROUP_0001 as Group} from './external/CE_PURCHASINGGROUP_0001';
 using {ZCE_PURCHASEORDERTYPE as PurchaseOrderType} from './external/ZCE_PURCHASEORDERTYPE';
+using {API_PLANT_SRV as Plant} from './external/API_PLANT_SRV';
+using {API_STORAGELOCATION_SRV as StorageLocation} from './external/API_STORAGELOCATION_SRV';
 
 service PurchaseOrder {
 
@@ -74,4 +76,21 @@ service PurchaseOrder {
         key PurchaseOrderType,
             PurchaseOrderTypeName
     }
+
+    @cds.persistence.exists
+    @cds.persistence.skip
+    entity VHE_Plants as projection on Plant.A_Plant {
+        key Plant,
+            PlantName,
+            CompanyCode,
+            CompanyCodeName
+    }
+
+    @cds.persistence.exists
+    @cds.persistence.skip
+    entity VHE_StorageLocation as projection on StorageLocation.StorageLocation {
+        key StorageLocation,
+            StorageLocationName,
+        key Plant
+    };
 };

@@ -12,7 +12,9 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             VHE_Organizations,
             VHE_Groups,
             VHE_PurchaseOrderTypes,
-            VHE_Suppliers
+            VHE_Suppliers,
+            VHE_Plants,
+            VHE_StorageLocation
         } = this.entities;
         
         const api_company = await cds.connect.to("API_COMPANYCODE_SRV");
@@ -20,16 +22,8 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
         const api_supplier = await cds.connect.to("API_BUSINESS_PARTNER");
         const api_group = await cds.connect.to("CE_PURCHASINGGROUP_0001");
         const api_purchordrtype = await cds.connect.to("ZCE_PURCHASEORDERTYPE");
-
-        //before
-        //on
-        //after
-
-        //Protocolo HTTP
-        //CREATE        --> NEW
-        //UPDATE
-        //DELETE
-        //READ
+        const api_plant = await cds.connect.to("API_PLANT_SRV");
+        const api_storageloc = await cds.connect.to("API_STORAGELOCATION_SRV");
 
         this.on('READ', VHE_Companies, async (req) => {
             return await api_company.tx(req).send({
@@ -110,6 +104,24 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             })
         });
 
+        this.on('READ', VHE_Plants, async (req) => {
+            return await api_plant.tx(req).send({
+                query: req.query,
+                headers: {
+                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
+                }
+            })
+        });
+
+        this.on('READ', VHE_StorageLocation, async (req) => {
+            return await api_storageloc.tx(req).send({
+                query: req.query,
+                headers: {
+                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
+                }
+            })
+        });
+
         this.before('NEW', PurchaseOrder.drafts, async (req) => {
 
             const dbp = await SELECT.one.from(PurchaseOrder).columns('max(PurchaseOrder)');
@@ -137,10 +149,29 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
         });
 
         this.before('NEW', PurchaseOrderItem.drafts, async (req) => {
-            
+
+            const parentID = req.data.PurchaseOrder_ID;
+
+            let {max} = await SELECT.one.from(PurchaseOrderItem.drafts)
+                        .columns('max(PurchaseOrderItem) as max')
+                        .where({PurchaseOrder_ID: parentID});
+
+            let newPosition = (parseInt(max ?? 0)) + 10;
+
+            req.data.PurchaseOrderItem = String(newPosition).padStart(5,'0');
         });
 
         return super.init();
     };
 
 };
+
+        //before
+        //on
+        //after
+
+        //Protocolo HTTP
+        //CREATE        --> NEW
+        //UPDATE
+        //DELETE
+        //READ
