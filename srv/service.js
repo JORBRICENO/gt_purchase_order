@@ -14,7 +14,8 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             VHE_PurchaseOrderTypes,
             VHE_Suppliers,
             VHE_Plants,
-            VHE_StorageLocation
+            VHE_StorageLocation,
+            VHE_Product
         } = this.entities;
         
         const api_company = await cds.connect.to("API_COMPANYCODE_SRV");
@@ -24,6 +25,7 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
         const api_purchordrtype = await cds.connect.to("ZCE_PURCHASEORDERTYPE");
         const api_plant = await cds.connect.to("API_PLANT_SRV");
         const api_storageloc = await cds.connect.to("API_STORAGELOCATION_SRV");
+        const api_product = await cds.connect.to("API_PRODUCT_SRV");
 
         this.on('READ', VHE_Companies, async (req) => {
             return await api_company.tx(req).send({
@@ -108,7 +110,8 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             return await api_plant.tx(req).send({
                 query: req.query,
                 headers: {
-                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
+                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
+                    //Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
                 }
             })
         });
@@ -120,6 +123,84 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
                     Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
                 }
             })
+        });
+
+        this.on('READ', VHE_Product, async (req) => {
+
+            const filter = req.query.SELECT.where;
+
+            let plant = '';
+            
+            if (filter) {
+                plant = filter[2]?.val;
+            }
+
+            if (!plant) {
+                return [];
+            }
+
+            const productQuery = SELECT.from('API_PRODUCT_SRV.A_ProductPlant')
+                                .columns('Product')
+                                .where({Plant: plant});
+
+            const aResults = await api_product.run(productQuery);
+            
+
+            const aIDs = [...new Set(aResults.map( p => p.Product))];
+
+            // const chunkSize = 10;
+            // const promises = [];
+
+            // for (let i = 0; i < aIDs.length; i += chunkSize) {
+            //     let chunk = aIDs.slice(i, i + chunkSize);
+                
+            //     const productDestailsQuery = SELECT.from('API_PRODUCT_SRV.A_Product')
+            //                                 .columns( p => {
+            //                                     p.Product,
+            //                                     p.to_Description( d => {
+            //                                         d.ProductDescription
+            //                                     }).where({Language: req.user.locale?? 'EN'})
+            //                                 })
+            //                                 .where({Product: { in: chunk}});
+
+            //     promises.push(api_product.run(productDestailsQuery));
+            // }
+
+
+            // const chunkResults = await Promise.all(promises);
+            // const aProductResults = chunkResults.flat();
+
+                const productDestailsQuery = SELECT.from('API_PRODUCT_SRV.A_Product')
+                                            .columns( p => {
+                                                p.Product,
+                                                p.ProductGroup,
+                                                p.ProductType,
+                                                p.BaseUnit,
+                                                p.to_Description( d => {
+                                                    d.ProductDescription
+                                                })
+                                                p.to_ProductProcurement( pp => {
+                                                    pp.PurchaseOrderQuantityUnit
+                                                })
+                                                .where({Language: req.user.locale?? 'EN'})
+                                            })
+                                            .where({Product: { in: aIDs}});
+
+            const aProductResults = await api_product.run(productDestailsQuery);
+
+            const results = aProductResults.map( p => ({
+                Product : p.Product,
+                ProductName: p.to_Description[0].ProductDescription,
+                ProductGroup: p.ProductGroup,
+                ProductType: p.ProductType,
+                PurchaseOrderQuantityUnit: p.to_ProductProcurement?.PurchaseOrderQuantityUnit?? p.BaseUnit,
+                Plant : plant
+            }));
+
+            console.log(results);
+
+            return results;
+
         });
 
         this.before('NEW', PurchaseOrder.drafts, async (req) => {

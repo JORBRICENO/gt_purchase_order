@@ -15,6 +15,7 @@ using {CE_PURCHASINGGROUP_0001 as Group} from '../srv/external/CE_PURCHASINGGROU
 using {ZCE_PURCHASEORDERTYPE as PurchaseOrderType} from '../srv/external/ZCE_PURCHASEORDERTYPE';
 using {API_PLANT_SRV as Plant} from '../srv/external/API_PLANT_SRV';
 using {API_STORAGELOCATION_SRV as StorageLocation} from '../srv/external/API_STORAGELOCATION_SRV';
+using {API_PRODUCT_SRV as Product} from '../srv/external/API_PRODUCT_SRV';
 
 entity PurchaseOrderHeader : cuid, managed {
     key PurchaseOrder              : String(10) @Core.Computed: true;
@@ -45,11 +46,10 @@ entity PurchaseOrderItem : cuid {
         PlantName                 : String(30);
         StorageLocation           : Association to StorageLocation.StorageLocation;
         StorageLocationName       : String(16);
-        //CompanyCode              : String(10);
-        Material                  : String(40);
-        MaterialName              : String;
+        Material                  : Association to Product.A_Product;
+        MaterialName              : String(40);
         MaterialGroup             : String(9);
-        ProductType               : String(2);
+        ProductType               : String(4);
         NetPriceQuantity          : Decimal(12, 3);
         OrderPriceUnit            : String(3);
         NetPriceAmount            : Decimal(5, 0);

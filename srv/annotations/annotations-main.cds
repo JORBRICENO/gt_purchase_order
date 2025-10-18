@@ -6,3 +6,4 @@ using from './annotations-organizations';
 using from './annotations-ordertypes';
 using from './annotations-groups';
 using from './annotations-plants';
+using from './annotations-products';

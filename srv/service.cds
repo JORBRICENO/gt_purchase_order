@@ -7,6 +7,7 @@ using {CE_PURCHASINGGROUP_0001 as Group} from './external/CE_PURCHASINGGROUP_000
 using {ZCE_PURCHASEORDERTYPE as PurchaseOrderType} from './external/ZCE_PURCHASEORDERTYPE';
 using {API_PLANT_SRV as Plant} from './external/API_PLANT_SRV';
 using {API_STORAGELOCATION_SRV as StorageLocation} from './external/API_STORAGELOCATION_SRV';
+using {API_PRODUCT_SRV as Product} from './external/API_PRODUCT_SRV';
 
 service PurchaseOrder {
 
@@ -14,22 +15,22 @@ service PurchaseOrder {
     entity PurchaseOrderItem as projection on entitites.PurchaseOrderItem;
 
     /**Value Helps */
-    @readonly
-    entity VH_Suppliers      as projection on entitites.Suppliers;
+    // @readonly
+    // entity VH_Suppliers      as projection on entitites.Suppliers;
 
-    @readonly
-    entity VH_Companies      as projection on entitites.Companies;
+    // @readonly
+    // entity VH_Companies      as projection on entitites.Companies;
 
-    @readonly
-    entity VH_Organizations  as projection on entitites.Organizations;
+    // @readonly
+    // entity VH_Organizations  as projection on entitites.Organizations;
 
-    @readonly
-    entity VH_OrderTypes     as projection on entitites.OrderTypes;
+    // @readonly
+    // entity VH_OrderTypes     as projection on entitites.OrderTypes;
 
-    @readonly
-    entity VH_Groups         as projection on entitites.Groups
-                                order by
-                                    PurchasingGroup;
+    // @readonly
+    // entity VH_Groups         as projection on entitites.Groups
+    //                             order by
+    //                                 PurchasingGroup;
 
     // entity VH_Categories as projection on entitites.Categories;
 
@@ -92,5 +93,16 @@ service PurchaseOrder {
         key StorageLocation,
             StorageLocationName,
         key Plant
+    };
+
+    @cds.persistence.exists
+    @cds.persistence.skip
+    entity VHE_Product as projection on Product.A_Product {
+        key Product,
+            to_Description.ProductDescription as ProductName,
+            ProductGroup,
+            ProductType,
+            to_ProductProcurement.PurchaseOrderQuantityUnit as PurchaseOrderQuantityUnit,
+            to_Plant.Plant as Plant
     };
 };

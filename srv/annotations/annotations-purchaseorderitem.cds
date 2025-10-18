@@ -2,8 +2,8 @@ using {PurchaseOrder} from '../service';
 
 annotate PurchaseOrder.PurchaseOrderItem with {
     PurchaseOrder              @title: 'Purchase Order';
-    PurchaseOrderItem          @title: 'Purchase Order Item' @Core.Computed: true;
-    PurchaseOrderItemText      @title : 'Purchase Order Item Text';
+    PurchaseOrderItem          @title: 'Purchase Order Item'           @Core.Computed       : true;
+    PurchaseOrderItemText      @title: 'Purchase Order Item Text';
     Plant                      @title: 'Plant';
     StorageLocation            @title: 'Storage Location';
     Material                   @title: 'Product';
@@ -20,70 +20,102 @@ annotate PurchaseOrder.PurchaseOrderItem with {
 };
 
 annotate PurchaseOrder.PurchaseOrderItem with {
-    Plant @Common: {
-        ValueList : {
-            $Type : 'Common.ValueListType',
-            CollectionPath : 'VHE_Plants',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterIn',
-                    LocalDataProperty : PurchaseOrder.CompanyCode_CompanyCode,
-                    ValueListProperty : 'CompanyCode'
-                },
-                {
-                    $Type : 'Common.ValueListParameterOut',
-                    LocalDataProperty : Plant_Plant,
-                    ValueListProperty : 'Plant'
-                },
-                {
-                    $Type : 'Common.ValueListParameterOut',
-                    LocalDataProperty : PlantName,
-                    ValueListProperty : 'PlantName'
-                }
-            ]
-        }
-    };
-    StorageLocation @Common: {
-        ValueList : {
-            $Type : 'Common.ValueListType',
-            CollectionPath : 'VHE_StorageLocation',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterIn',
-                    LocalDataProperty : Plant_Plant,
-                    ValueListProperty : 'Plant'
-                },
-                {
-                    $Type : 'Common.ValueListParameterOut',
-                    LocalDataProperty : StorageLocation_StorageLocation,
-                    ValueListProperty : 'StorageLocation'
-                },
-                {
-                    $Type : 'Common.ValueListParameterOut',
-                    LocalDataProperty : StorageLocationName,
-                    ValueListProperty : 'StorageLocationName'
-                }
-            ]
-        }
-    }
+    Plant           @Common: {ValueList: {
+        $Type         : 'Common.ValueListType',
+        CollectionPath: 'VHE_Plants',
+        Parameters    : [
+            {
+                $Type            : 'Common.ValueListParameterIn',
+                LocalDataProperty: PurchaseOrder.CompanyCode_CompanyCode,
+                ValueListProperty: 'CompanyCode'
+            },
+            {
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: Plant_Plant,
+                ValueListProperty: 'Plant'
+            },
+            {
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: PlantName,
+                ValueListProperty: 'PlantName'
+            }
+        ]
+    }};
+    StorageLocation @Common: {ValueList: {
+        $Type         : 'Common.ValueListType',
+        CollectionPath: 'VHE_StorageLocation',
+        Parameters    : [
+            {
+                $Type            : 'Common.ValueListParameterIn',
+                LocalDataProperty: Plant_Plant,
+                ValueListProperty: 'Plant'
+            },
+            {
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: StorageLocation_StorageLocation,
+                ValueListProperty: 'StorageLocation'
+            },
+            {
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: StorageLocationName,
+                ValueListProperty: 'StorageLocationName'
+            }
+        ]
+    }};
+    Material        @Common: {ValueList: {
+        $Type         : 'Common.ValueListType',
+        CollectionPath: 'VHE_Product',
+        Parameters    : [
+            {
+                $Type            : 'Common.ValueListParameterIn',
+                LocalDataProperty: Plant_Plant,
+                ValueListProperty: 'Plant'
+            },
+            {
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: Material_Product,
+                ValueListProperty: 'Product'
+            },
+            {
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: MaterialName,
+                ValueListProperty: 'ProductName'
+            },
+            {
+                $Type : 'Common.ValueListParameterOut',
+                LocalDataProperty : MaterialGroup,
+                ValueListProperty : 'ProductGroup'
+            },
+            {
+                $Type : 'Common.ValueListParameterOut',
+                LocalDataProperty : ProductType,
+                ValueListProperty : 'ProductType'
+            },
+            {
+                $Type : 'Common.ValueListParameterOut',
+                LocalDataProperty : PurchaseOrderQuantityUnit,
+                ValueListProperty : 'PurchaseOrderQuantityUnit'
+            }
+        ]
+    }}
 };
 
 
 annotate PurchaseOrder.PurchaseOrderItem with @(
-    UI.HeaderInfo: {
-        $Type : 'UI.HeaderInfoType',
-        TypeName : 'Item',
-        TypeNamePlural : 'Items',
-        Title : {
-            $Type : 'UI.DataField',
-            Value : PurchaseOrder.PurchaseOrder
+    UI.HeaderInfo                  : {
+        $Type         : 'UI.HeaderInfoType',
+        TypeName      : 'Item',
+        TypeNamePlural: 'Items',
+        Title         : {
+            $Type: 'UI.DataField',
+            Value: PurchaseOrder.PurchaseOrder
         },
-        Description : {
-            $Type : 'UI.DataField',
-            Value : PurchaseOrder.PurchaseOrderDate
+        Description   : {
+            $Type: 'UI.DataField',
+            Value: PurchaseOrder.PurchaseOrderDate
         },
     },
-    UI.LineItem: [
+    UI.LineItem                    : [
         {
             $Type             : 'UI.DataField',
             Value             : PurchaseOrderItem,
@@ -94,22 +126,22 @@ annotate PurchaseOrder.PurchaseOrderItem with @(
         },
         {
             $Type: 'UI.DataField',
-            Value: Material
+            Value: Material_Product
         },
         {
-            $Type: 'UI.DataField',
-            Value: MaterialGroup,
-            @HTML5.CssDefaults : {
-                $Type : 'HTML5.CssDefaultsType',
-                width : '12rem'
+            $Type             : 'UI.DataField',
+            Value             : MaterialGroup,
+            @HTML5.CssDefaults: {
+                $Type: 'HTML5.CssDefaultsType',
+                width: '12rem'
             }
         },
         {
-            $Type: 'UI.DataField',
-            Value: ProductType,
-            @HTML5.CssDefaults : {
-                $Type : 'HTML5.CssDefaultsType',
-                width : '12rem'
+            $Type             : 'UI.DataField',
+            Value             : ProductType,
+            @HTML5.CssDefaults: {
+                $Type: 'HTML5.CssDefaultsType',
+                width: '12rem'
             }
         },
         {
@@ -137,89 +169,89 @@ annotate PurchaseOrder.PurchaseOrderItem with @(
             }
         }
     ],
-    UI.FieldGroup #DeliveryData : {
-        $Type : 'UI.FieldGroupType',
+    UI.FieldGroup #DeliveryData    : {
+        $Type: 'UI.FieldGroupType',
         Data : [
             {
-                $Type : 'UI.DataField',
-                Value : PurchaseOrderItem
+                $Type: 'UI.DataField',
+                Value: PurchaseOrderItem
             },
             {
-                $Type : 'UI.DataField',
-                Value : PurchaseOrderItemText
+                $Type: 'UI.DataField',
+                Value: PurchaseOrderItemText
             },
             {
-                $Type : 'UI.DataField',
-                Value : Plant_Plant
+                $Type: 'UI.DataField',
+                Value: Plant_Plant
             },
             {
-                $Type : 'UI.DataField',
-                Value : StorageLocation_StorageLocation
+                $Type: 'UI.DataField',
+                Value: StorageLocation_StorageLocation
             }
         ]
     },
-    UI.FieldGroup  #MaterialDetails : {
-        $Type : 'UI.FieldGroupType',
+    UI.FieldGroup #MaterialDetails : {
+        $Type: 'UI.FieldGroupType',
         Data : [
             {
-                $Type : 'UI.DataField',
-                Value : Material
+                $Type: 'UI.DataField',
+                Value: Material_Product
             },
             {
-                $Type : 'UI.DataField',
-                Value : MaterialName
+                $Type: 'UI.DataField',
+                Value: MaterialName
             },
             {
-                $Type : 'UI.DataField',
-                Value : MaterialGroup
+                $Type: 'UI.DataField',
+                Value: MaterialGroup
             },
             {
-                $Type : 'UI.DataField',
-                Value : ProductType
+                $Type: 'UI.DataField',
+                Value: ProductType
             }
         ]
     },
-    UI.FieldGroup #QuantityAndPrice : {
-        $Type : 'UI.FieldGroupType',
+    UI.FieldGroup #QuantityAndPrice: {
+        $Type: 'UI.FieldGroupType',
         Data : [
             {
-                $Type : 'UI.DataField',
-                Value : OrderQuantity
+                $Type: 'UI.DataField',
+                Value: OrderQuantity
             },
             {
-                $Type : 'UI.DataField',
-                Value : NetPriceAmount
+                $Type: 'UI.DataField',
+                Value: NetPriceAmount
             },
             {
-                $Type : 'UI.DataField',
-                Value : NetPriceQuantity
+                $Type: 'UI.DataField',
+                Value: NetPriceQuantity
             },
             {
-                $Type : 'UI.DataField',
-                Value : TaxCode
+                $Type: 'UI.DataField',
+                Value: TaxCode
             }
         ]
     },
-    UI.Facets  : [
+    UI.Facets                      : [
         {
             $Type : 'UI.CollectionFacet',
             Label : 'General Information',
-            Facets : [
+            Facets: [
                 {
                     $Type : 'UI.ReferenceFacet',
-                    Target : '@UI.FieldGroup#DeliveryData',
+                    Target: '@UI.FieldGroup#DeliveryData',
                     Label : 'Delivery Data'
                 },
                 {
                     $Type : 'UI.ReferenceFacet',
-                    Target : '@UI.FieldGroup#MaterialDetails',
+                    Target: '@UI.FieldGroup#MaterialDetails',
                     Label : 'Material Details'
                 }
             ]
         },
         {
             $Type : 'UI.ReferenceFacet',
-            Target : '@UI.FieldGroup#QuantityAndPrice',
+            Target: '@UI.FieldGroup#QuantityAndPrice',
             Label : 'Quantity and Price'
         }
     ]

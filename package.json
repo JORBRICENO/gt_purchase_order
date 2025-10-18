@@ -67,7 +67,7 @@
         "kind": "odata-v2",
         "model": "srv/external/API_PLANT_SRV",
         "credentials": {
-          "url": "http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/API_PLANT_SRV"
+          "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_PLANT_SRV"
         }
       },
       "API_STORAGELOCATION_SRV": {
@@ -75,6 +75,16 @@
         "model": "srv/external/API_STORAGELOCATION_SRV",
         "credentials": {
           "url": "http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/API_STORAGELOCATION_SRV"
+        }
+      },
+      "API_PRODUCT_SRV": {
+        "kind": "odata-v2",
+        "model": "srv/external/API_PRODUCT_SRV",
+        "credentials": {
+          "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_PRODUCT_SRV",
+          "headers": {
+            "apikey": "MatGW3Mzcozw8FjoqggdaNAzYc7koHho"
+          }
         }
       }
     }
