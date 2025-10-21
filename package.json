@@ -81,9 +81,9 @@
         "kind": "odata-v2",
         "model": "srv/external/API_PRODUCT_SRV",
         "credentials": {
-          "url": "http://s4h24.sap4practice.com:8024/sap/opu/odata/sap/API_PRODUCT_SRV",
+          "url": "http://s4h22.sap4practice.com:8007/sap/opu/odata/sap/API_PRODUCT_SRV",
           "headers": {
-            "Authorization": "Basic amJyaWNlbm86TG9nYWxpLjIwMjQ="
+            "Authorization": "Basic amJyaWNlbm86TG9nYWxpLjIwMjY="
           }
         }
       },

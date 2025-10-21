@@ -1,5 +1,4 @@
 const cds = require('@sap/cds');
-const { header } = require('@sap/cds/lib/i18n/locale');
 const moment = require('moment');
 
 module.exports = class PurchaseOrder extends cds.ApplicationService {
@@ -103,7 +102,7 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             return await api_purchordrtype.tx(req).send({
                 query: req.query,
                 headers: {
-                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
+                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjY='
                 }
             })
         });
@@ -113,7 +112,7 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
                 query: req.query,
                 headers: {
                     apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
-                    //Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
+                    //Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjY='
                 }
             })
         });
@@ -122,7 +121,7 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             return await api_storageloc.tx(req).send({
                 query: req.query,
                 headers: {
-                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjU='
+                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjY='
                 }
             })
         });
@@ -206,80 +205,83 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
         });
 
         this.before('PATCH', PurchaseOrderItem.drafts, async (req) => {
-           
-            const parent = req.params[0].ID;
-            const children = req.params[1].ID;
-            //PurchaseOrder, Material,Plant,Supplier,PurchasingOrganization
 
-            const result = await SELECT.one.from(PurchaseOrderItem.drafts)
-                                .columns(i => {
-                                    i.PurchaseOrder_ID,
-                                    i.Material_Product,
-                                    i.Plant_Plant,
-                                    i.PurchaseOrder (p => {
-                                        p.Supplier_Supplier,
-                                        p.PurchasingOrganization_PurchasingOrganization
+            if ('Material_Product' in req.data || 'Plant_Plant' in req.data) {
+
+                const parent = req.params[0].ID;
+                const children = req.params[1].ID;
+                //PurchaseOrder, Material,Plant,Supplier,PurchasingOrganization
+
+                const result = await SELECT.one.from(PurchaseOrderItem.drafts)
+                                    .columns(i => {
+                                        i.PurchaseOrder_ID,
+                                        i.Material_Product,
+                                        i.Plant_Plant,
+                                        i.PurchaseOrder (p => {
+                                            p.Supplier_Supplier,
+                                            p.PurchasingOrganization_PurchasingOrganization
+                                        })
                                     })
-                                })
-                                .where({ID: children, PurchaseOrder_ID: parent});
+                                    .where({ID: children, PurchaseOrder_ID: parent});
 
-            console.log(result);
-            
-            let material = result.Material_Product;
-            let plant = result.Plant_Plant;
-            let supplier = result.PurchaseOrder.Supplier_Supplier;
-            let purchasingOrg = result.PurchaseOrder.PurchasingOrganization_PurchasingOrganization;
+                let material = result.Material_Product;
+                let plant = result.Plant_Plant;
+                let supplier = result.PurchaseOrder.Supplier_Supplier;
+                let purchasingOrg = result.PurchaseOrder.PurchasingOrganization_PurchasingOrganization;
 
-            console.log({material,plant,supplier,purchasingOrg});
-
-            if (!material || !plant || !supplier || !purchasingOrg) {
-                console.log("Faltan alguno campos necesarios para poder hacer la consulta");
-            }
-
-            const priceQuery = SELECT.one.from('API_INFORECORD_PROCESS_SRV.A_PurgInfoRecdOrgPlantData')
-                                .columns(
-                                    'NetPriceAmount',
-                                    'Currency',
-                                    'MaterialPriceUnitQty',
-                                    'NetPriceQuantityUnit',
-                                    'PurchaseOrderPriceUnit',
-                                    'TaxCode'
-                                ).where({
-                                    Material: material,
-                                    Plant: plant,
-                                    Supplier: supplier,
-                                    PurchasingOrganization: purchasingOrg
-                                });
-
-                try {
-
-                    const priceResult = await api_inforecord.run(priceQuery);
-                    
-                    if (priceResult) {
-                        await UPDATE.entity(PurchaseOrderItem.drafts).set({
-                            NetPriceAmount: priceQuery.NetPriceAmount,
-                            DocumentCurrency_code: priceQuery.Currency,
-                            NetPriceQuantity: priceResult.MaterialPriceUnitQty,
-                            OrderPriceUnit: priceResult.PurchaseOrderPriceUnit,
-                            TaxCode: priceResult.TaxCode
-                        })
-                        .where({ID: children, PurchaseOrder_ID: parent});
-                    } else {
-                        await UPDATE.entity(PurchaseOrderItem.drafts).set({
-                            NetPriceAmount: '',
-                            DocumentCurrency_code: '',
-                            NetPriceQuantity: 1,
-                            OrderPriceUnit: '',
-                            TaxCode: ''
-                        })
-                        .where({ID: children, PurchaseOrder_ID: parent});
-                    }
-
-                } catch (error) {
-                    console.log(error);
+                if (!material || !plant || !supplier || !purchasingOrg) {
+                    console.log("Faltan alguno campos necesarios para poder hacer la consulta");
                 }
 
+                const priceQuery = SELECT.one.from('API_INFORECORD_PROCESS_SRV.A_PurgInfoRecdOrgPlantData')
+                                    .columns(
+                                        'NetPriceAmount',
+                                        'Currency',
+                                        'MaterialPriceUnitQty',
+                                        'NetPriceQuantityUnit',
+                                        'PurchaseOrderPriceUnit',
+                                        'TaxCode'
+                                    ).where({
+                                        Material: material,
+                                        Plant: plant,
+                                        Supplier: supplier,
+                                        PurchasingOrganization: purchasingOrg
+                                    });
 
+                    try {
+
+                        const priceResult = await api_inforecord.run(priceQuery);
+
+                        console.log(priceResult);
+                        
+                        if (priceResult) {
+                            await UPDATE.entity(PurchaseOrderItem.drafts).set({
+                                NetPriceAmount: priceResult.NetPriceAmount,
+                                DocumentCurrency_code: priceResult.Currency,
+                                NetPriceQuantity: priceResult.MaterialPriceUnitQty,
+                                OrderPriceUnit_code: priceResult.PurchaseOrderPriceUnit,
+                                PurchaseOrderQuantityUnit_code: priceResult.PurchaseOrderPriceUnit,
+                                TaxCode: priceResult.TaxCode
+                            })
+                            .where({ID: children, PurchaseOrder_ID: parent});
+                        } else {
+                            await UPDATE.entity(PurchaseOrderItem.drafts).set({
+                                NetPriceAmount: '',
+                                DocumentCurrency_code: '',
+                                NetPriceQuantity: 1,
+                                OrderPriceUnit_code: '',
+                                PurchaseOrderQuantityUnit_code: '',
+                                TaxCode: ''
+                            })
+                            .where({ID: children, PurchaseOrder_ID: parent});
+                        }
+
+                    } catch (error) {
+                        console.log(error);
+                    }
+
+            } // Cierre if
+           
         });
 
         this.before('NEW', PurchaseOrder.drafts, async (req) => {

@@ -160,8 +160,7 @@ annotate pos.PurchaseOrder with @(
         $Type: 'UI.FieldGroupType',
         Data : [{
             $Type : 'UI.DataFieldForAnnotation',
-            Target: '@UI.DataPoint#TotalAmount',
-            Label : 'Total Amount'
+            Target: '@UI.DataPoint#TotalAmount'
         }]
     },
     UI.HeaderFacets                  : [{

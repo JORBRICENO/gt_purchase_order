@@ -102,24 +102,23 @@ annotate PurchaseOrder.PurchaseOrderItem with {
 
 
 annotate PurchaseOrder.PurchaseOrderItem with @(
-    Common.SideEffects: {
-        $Type : 'Common.SideEffectsType',
-        SourceProperties : [
+    Common.SideEffects             : {
+        $Type           : 'Common.SideEffectsType',
+        SourceProperties: [
             'Material_Product',
             'NetPriceAmount',
             'NetPriceQuantity',
-            'OrderQuantity'
+            'OrderQuantity',
+            'PurchaseOrderPriceUnit'
         ],
-        TargetProperties : [
+        TargetProperties: [
             'NetPriceAmount',
             'DocumentCurrency_code',
             'NetPriceQuantity',
             'PurchaseOrderQuantityUnit',
             'TaxCode'
         ],
-        TargetEntities : [
-            PurchaseOrder
-        ]
+        TargetEntities  : [PurchaseOrder]
     },
     UI.HeaderInfo                  : {
         $Type         : 'UI.HeaderInfoType',
@@ -132,7 +131,7 @@ annotate PurchaseOrder.PurchaseOrderItem with @(
         Description   : {
             $Type: 'UI.DataField',
             Value: PurchaseOrder.PurchaseOrderDate
-        },
+        }
     },
     UI.LineItem                    : [
         {
