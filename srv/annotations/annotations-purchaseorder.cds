@@ -13,8 +13,9 @@ annotate pos.PurchaseOrder with {
     Language                   @title       : 'Language';
     PurchaseOrderDate          @title       : 'Purchase Date';
     PurchasingGroup            @title       : 'Purchasing Group';
-    DocumentCurrency           @title       : 'Currency';
+    DocumentCurrency           @title: 'Currency'      @Common.IsCurrency;
     PurchasingProcessingStatus @title       : 'Overall Status';
+    TotalAmount                @title: 'Total Amount'  @Measures.ISOCurrency: DocumentCurrency_code;
 };
 
 annotate pos.PurchaseOrder with {
@@ -35,9 +36,9 @@ annotate pos.PurchaseOrder with {
                     ValueListProperty: 'CompanyCode'
                 },
                 {
-                    $Type : 'Common.ValueListParameterOut',
-                    LocalDataProperty : CompanyName,
-                    ValueListProperty : 'CompanyCodeName'
+                    $Type            : 'Common.ValueListParameterOut',
+                    LocalDataProperty: CompanyName,
+                    ValueListProperty: 'CompanyCodeName'
                 }
             ]
         }
@@ -55,105 +56,119 @@ annotate pos.PurchaseOrder with {
                     ValueListProperty: 'CompanyCode'
                 },
                 {
-                    $Type : 'Common.ValueListParameterOut',
-                    LocalDataProperty : PurchasingOrganization_PurchasingOrganization,
-                    ValueListProperty : 'PurchasingOrganization'
+                    $Type            : 'Common.ValueListParameterOut',
+                    LocalDataProperty: PurchasingOrganization_PurchasingOrganization,
+                    ValueListProperty: 'PurchasingOrganization'
                 },
                 {
-                    $Type : 'Common.ValueListParameterOut',
-                    LocalDataProperty : PurchasingOrganizationName,
-                    ValueListProperty : 'PurchasingOrganizationName'
+                    $Type            : 'Common.ValueListParameterOut',
+                    LocalDataProperty: PurchasingOrganizationName,
+                    ValueListProperty: 'PurchasingOrganizationName'
                 }
             ]
         }
     };
-    PurchaseOrderType          @Common: {
+    PurchaseOrderType          @Common: {ValueList: {
+        $Type         : 'Common.ValueListType',
+        CollectionPath: 'VHE_PurchaseOrderTypes',
+        Parameters    : [{
+            $Type            : 'Common.ValueListParameterInOut',
+            LocalDataProperty: PurchaseOrderType_PurchaseOrderType,
+            ValueListProperty: 'PurchaseOrderType'
+        }]
+    }};
+    PurchasingGroup            @Common: {
+        Text           : PurchasingGroupName,
+        TextArrangement: #TextOnly,
         ValueList      : {
             $Type         : 'Common.ValueListType',
-            CollectionPath: 'VHE_PurchaseOrderTypes',
-            Parameters    : [{
-                $Type            : 'Common.ValueListParameterInOut',
-                LocalDataProperty: PurchaseOrderType_PurchaseOrderType,
-                ValueListProperty: 'PurchaseOrderType'
-            }]
-        }
-    };
-    PurchasingGroup @Common: {
-        Text : PurchasingGroupName,
-        TextArrangement : #TextOnly,
-        ValueList : {
-            $Type : 'Common.ValueListType',
-            CollectionPath : 'VHE_Groups',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : PurchasingGroup_PurchasingGroup,
-                    ValueListProperty : 'PurchasingGroup'
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'Description'
-                }
-            ]
-        }
-    };
-    Supplier                   @Common: {
-        ValueList      : {
-            $Type         : 'Common.ValueListType',
-            CollectionPath: 'VHE_Suppliers',
+            CollectionPath: 'VHE_Groups',
             Parameters    : [
                 {
-                    $Type : 'Common.ValueListParameterIn',
-                    LocalDataProperty : PurchasingOrganization_PurchasingOrganization,
-                    ValueListProperty : 'PurchasingOrganization'
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: PurchasingGroup_PurchasingGroup,
+                    ValueListProperty: 'PurchasingGroup'
                 },
                 {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : Supplier_Supplier,
-                    ValueListProperty : 'Supplier'
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'SupplierName'
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'Description'
                 }
             ]
-        },
+        }
     };
-    // Category @Common: {
-    //     ValueList : {
-    //         $Type : 'Common.ValueListType',
-    //         CollectionPath : 'VH_Categories',
-    //         Parameters : [
-    //             {
-    //                 $Type : 'Common.ValueListParameterInOut',
-    //                 LocalDataProperty : Category_ID,
-    //                 ValueListProperty : 'ID'
-    //             },
-    //         ],
-    //     },
-    // };
-    // SubCategory @Common : { 
-    //     ValueList : {
-    //         $Type : 'Common.ValueListType',
-    //         CollectionPath : 'VH_SubCategories',
-    //         Parameters : [
-    //            {
-    //                $Type : 'Common.ValueListParameterIn',
-    //                LocalDataProperty : Category_ID,
-    //                ValueListProperty : 'Category_ID'
-    //            },
-    //            {
-    //                $Type : 'Common.ValueListParameterOut',
-    //                LocalDataProperty : SubCategory_ID,
-    //                ValueListProperty : 'ID'
-    //            }
-    //         ]
-    //     }
-    //  }
+    Supplier                   @Common: {ValueList: {
+        $Type         : 'Common.ValueListType',
+        CollectionPath: 'VHE_Suppliers',
+        Parameters    : [
+            {
+                $Type            : 'Common.ValueListParameterIn',
+                LocalDataProperty: PurchasingOrganization_PurchasingOrganization,
+                ValueListProperty: 'PurchasingOrganization'
+            },
+            {
+                $Type            : 'Common.ValueListParameterInOut',
+                LocalDataProperty: Supplier_Supplier,
+                ValueListProperty: 'Supplier'
+            },
+            {
+                $Type            : 'Common.ValueListParameterDisplayOnly',
+                ValueListProperty: 'SupplierName'
+            }
+        ]
+    }, };
+// Category @Common: {
+//     ValueList : {
+//         $Type : 'Common.ValueListType',
+//         CollectionPath : 'VH_Categories',
+//         Parameters : [
+//             {
+//                 $Type : 'Common.ValueListParameterInOut',
+//                 LocalDataProperty : Category_ID,
+//                 ValueListProperty : 'ID'
+//             },
+//         ],
+//     },
+// };
+// SubCategory @Common : {
+//     ValueList : {
+//         $Type : 'Common.ValueListType',
+//         CollectionPath : 'VH_SubCategories',
+//         Parameters : [
+//            {
+//                $Type : 'Common.ValueListParameterIn',
+//                LocalDataProperty : Category_ID,
+//                ValueListProperty : 'Category_ID'
+//            },
+//            {
+//                $Type : 'Common.ValueListParameterOut',
+//                LocalDataProperty : SubCategory_ID,
+//                ValueListProperty : 'ID'
+//            }
+//         ]
+//     }
+//  }
 };
 
 
 annotate pos.PurchaseOrder with @(
+    UI.DataPoint #TotalAmount        : {
+        $Type        : 'UI.DataPointType',
+        Value        : TotalAmount,
+        Visualization: #Number
+    },
+    UI.FieldGroup #TotalAmount       : {
+        $Type: 'UI.FieldGroupType',
+        Data : [{
+            $Type : 'UI.DataFieldForAnnotation',
+            Target: '@UI.DataPoint#TotalAmount',
+            Label : 'Total Amount'
+        }]
+    },
+    UI.HeaderFacets                  : [{
+        $Type : 'UI.ReferenceFacet',
+        Target: '@UI.FieldGroup#TotalAmount',
+        Label : 'Total Amount'
+    }],
     UI.SelectionFields               : [
         PurchaseOrder,
         CompanyCode_CompanyCode,
@@ -164,8 +179,8 @@ annotate pos.PurchaseOrder with @(
         Language_code,
         DocumentCurrency_code,
         PurchasingProcessingStatus_code,
-        // Category_ID,
-        // SubCategory_ID
+    // Category_ID,
+    // SubCategory_ID
     ],
     UI.HeaderInfo                    : {
         $Type         : 'UI.HeaderInfoType',
@@ -237,7 +252,11 @@ annotate pos.PurchaseOrder with @(
                 $Type: 'HTML5.CssDefaultsType',
                 width: '10rem'
             }
-        }
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: TotalAmount,
+        },
     ],
     UI.FieldGroup #OrganizationalData: {
         $Type: 'UI.FieldGroupType',
@@ -279,28 +298,18 @@ annotate pos.PurchaseOrder with @(
     },
     UI.FieldGroup #StatusInformation : {
         $Type: 'UI.FieldGroupType',
-        Data : [
-            {
-                $Type: 'UI.DataField',
-                Value: PurchasingProcessingStatus_code,
-                @Common.FieldControl : {
-                    $edmJson: {
-                        $If:[
-                            {
-                                $Eq:[
-                                    {
-                                        $Path: 'IsActiveEntity'
-                                    },
-                                    false
-                                ]
-                            },
-                            1,
-                            3
-                        ]
-                    }
-                }
-            }
-        ]
+        Data : [{
+            $Type               : 'UI.DataField',
+            Value               : PurchasingProcessingStatus_code,
+            @Common.FieldControl: {$edmJson: {$If: [
+                {$Eq: [
+                    {$Path: 'IsActiveEntity'},
+                    false
+                ]},
+                1,
+                3
+            ]}}
+        }]
     },
     UI.Facets                        : [
         {

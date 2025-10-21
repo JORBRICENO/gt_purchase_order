@@ -1,4 +1,5 @@
 const cds = require('@sap/cds');
+const { header } = require('@sap/cds/lib/i18n/locale');
 const moment = require('moment');
 
 module.exports = class PurchaseOrder extends cds.ApplicationService {
@@ -26,6 +27,7 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
         const api_plant = await cds.connect.to("API_PLANT_SRV");
         const api_storageloc = await cds.connect.to("API_STORAGELOCATION_SRV");
         const api_product = await cds.connect.to("API_PRODUCT_SRV");
+        const api_inforecord = await cds.connect.to("API_INFORECORD_PROCESS_SRV");
 
         this.on('READ', VHE_Companies, async (req) => {
             return await api_company.tx(req).send({
@@ -148,45 +150,47 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
 
             const aIDs = [...new Set(aResults.map( p => p.Product))];
 
-            // const chunkSize = 10;
-            // const promises = [];
+            const chunkSize = 10;
+            const promises = [];
 
-            // for (let i = 0; i < aIDs.length; i += chunkSize) {
-            //     let chunk = aIDs.slice(i, i + chunkSize);
+            for (let i = 0; i < aIDs.length; i += chunkSize) {
+                let chunk = aIDs.slice(i, i + chunkSize);
                 
-            //     const productDestailsQuery = SELECT.from('API_PRODUCT_SRV.A_Product')
-            //                                 .columns( p => {
-            //                                     p.Product,
-            //                                     p.to_Description( d => {
-            //                                         d.ProductDescription
-            //                                     }).where({Language: req.user.locale?? 'EN'})
-            //                                 })
-            //                                 .where({Product: { in: chunk}});
-
-            //     promises.push(api_product.run(productDestailsQuery));
-            // }
-
-
-            // const chunkResults = await Promise.all(promises);
-            // const aProductResults = chunkResults.flat();
-
                 const productDestailsQuery = SELECT.from('API_PRODUCT_SRV.A_Product')
                                             .columns( p => {
                                                 p.Product,
-                                                p.ProductGroup,
-                                                p.ProductType,
-                                                p.BaseUnit,
                                                 p.to_Description( d => {
                                                     d.ProductDescription
-                                                })
-                                                p.to_ProductProcurement( pp => {
-                                                    pp.PurchaseOrderQuantityUnit
-                                                })
-                                                .where({Language: req.user.locale?? 'EN'})
+                                                }).where({Language: req.user.locale?? 'EN'})
                                             })
-                                            .where({Product: { in: aIDs}});
+                                            .where({Product: { in: chunk}});
 
-            const aProductResults = await api_product.run(productDestailsQuery);
+                promises.push(api_product.run(productDestailsQuery));
+            }
+
+
+            const chunkResults = await Promise.all(promises);
+            const aProductResults = chunkResults.flat();
+
+            /** Sandbox */
+
+            //     const productDestailsQuery = SELECT.from('API_PRODUCT_SRV.A_Product')
+            //                                 .columns( p => {
+            //                                     p.Product,
+            //                                     p.ProductGroup,
+            //                                     p.ProductType,
+            //                                     p.BaseUnit,
+            //                                     p.to_Description( d => {
+            //                                         d.ProductDescription
+            //                                     })
+            //                                     p.to_ProductProcurement( pp => {
+            //                                         pp.PurchaseOrderQuantityUnit
+            //                                     })
+            //                                     .where({Language: req.user.locale?? 'EN'})
+            //                                 })
+            //                                 .where({Product: { in: aIDs}});
+
+            // const aProductResults = await api_product.run(productDestailsQuery);
 
             const results = aProductResults.map( p => ({
                 Product : p.Product,
@@ -197,9 +201,84 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
                 Plant : plant
             }));
 
-            console.log(results);
-
             return results;
+
+        });
+
+        this.before('PATCH', PurchaseOrderItem.drafts, async (req) => {
+           
+            const parent = req.params[0].ID;
+            const children = req.params[1].ID;
+            //PurchaseOrder, Material,Plant,Supplier,PurchasingOrganization
+
+            const result = await SELECT.one.from(PurchaseOrderItem.drafts)
+                                .columns(i => {
+                                    i.PurchaseOrder_ID,
+                                    i.Material_Product,
+                                    i.Plant_Plant,
+                                    i.PurchaseOrder (p => {
+                                        p.Supplier_Supplier,
+                                        p.PurchasingOrganization_PurchasingOrganization
+                                    })
+                                })
+                                .where({ID: children, PurchaseOrder_ID: parent});
+
+            console.log(result);
+            
+            let material = result.Material_Product;
+            let plant = result.Plant_Plant;
+            let supplier = result.PurchaseOrder.Supplier_Supplier;
+            let purchasingOrg = result.PurchaseOrder.PurchasingOrganization_PurchasingOrganization;
+
+            console.log({material,plant,supplier,purchasingOrg});
+
+            if (!material || !plant || !supplier || !purchasingOrg) {
+                console.log("Faltan alguno campos necesarios para poder hacer la consulta");
+            }
+
+            const priceQuery = SELECT.one.from('API_INFORECORD_PROCESS_SRV.A_PurgInfoRecdOrgPlantData')
+                                .columns(
+                                    'NetPriceAmount',
+                                    'Currency',
+                                    'MaterialPriceUnitQty',
+                                    'NetPriceQuantityUnit',
+                                    'PurchaseOrderPriceUnit',
+                                    'TaxCode'
+                                ).where({
+                                    Material: material,
+                                    Plant: plant,
+                                    Supplier: supplier,
+                                    PurchasingOrganization: purchasingOrg
+                                });
+
+                try {
+
+                    const priceResult = await api_inforecord.run(priceQuery);
+                    
+                    if (priceResult) {
+                        await UPDATE.entity(PurchaseOrderItem.drafts).set({
+                            NetPriceAmount: priceQuery.NetPriceAmount,
+                            DocumentCurrency_code: priceQuery.Currency,
+                            NetPriceQuantity: priceResult.MaterialPriceUnitQty,
+                            OrderPriceUnit: priceResult.PurchaseOrderPriceUnit,
+                            TaxCode: priceResult.TaxCode
+                        })
+                        .where({ID: children, PurchaseOrder_ID: parent});
+                    } else {
+                        await UPDATE.entity(PurchaseOrderItem.drafts).set({
+                            NetPriceAmount: '',
+                            DocumentCurrency_code: '',
+                            NetPriceQuantity: 1,
+                            OrderPriceUnit: '',
+                            TaxCode: ''
+                        })
+                        .where({ID: children, PurchaseOrder_ID: parent});
+                    }
+
+                } catch (error) {
+                    console.log(error);
+                }
+
 
         });
 
@@ -240,6 +319,68 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             let newPosition = (parseInt(max ?? 0)) + 10;
 
             req.data.PurchaseOrderItem = String(newPosition).padStart(5,'0');
+        });
+
+        this.after('READ', PurchaseOrder, async (data, req) => {
+
+            const results = Array.isArray(data) ? data : [data];
+
+            if (results.length === 0 || !results[0]) {
+                return;
+            }
+
+            let totalAmount = false;
+
+            if (req.query.SELECT.columns) {
+                totalAmount = req.query.SELECT.columns.some( c => {
+                    return c && c.ref && Array.isArray(c.ref) && c.ref.includes('TotalAmount')
+                })
+            }
+
+            if (!totalAmount) {
+                return;
+            }
+
+            const itemEntity = req.target.isDraft ? PurchaseOrderItem.drafts : PurchaseOrderItem;
+
+            await Promise.all(results.map(async (header) => {
+
+                if (!header) return;
+
+                let items = header.to_PurchaseOrderItem;
+
+                if (!items) {
+                    items = await SELECT.from(itemEntity).where({PurchaseOrder_ID: header.ID})
+                }
+
+                if (!items) return;
+
+                const total = items.reduce((sum, item) => {
+                    const quantity = item.OrderQuantity || 0;
+                    const price = item.NetPriceAmount || 0;
+                    return sum + (quantity * price);
+                },0);
+
+                header.TotalAmount = total;
+
+            }));
+
+        });
+
+        this.after('PATCH', PurchaseOrderItem.drafts, async (data, req) => {
+            const parent = req.params[0].ID;
+
+            if ('OrderQuantity' in req.data || 'NetPriceAmount' in req.data) {
+                const allItems = await SELECT.from(PurchaseOrderItem.drafts).where({PurchaseOrder_ID: parent});
+
+                const total = allItems.reduce((sum, item) => {
+                    const quantity = item.OrderQuantity || 0;
+                    const price = item.NetPriceAmount || 0;
+                    return sum + (quantity * price);
+                },0);
+
+                await UPDATE.entity(PurchaseOrder.drafts).set({TotalAmount: total}).where({ID: parent});
+            }
         });
 
         return super.init();

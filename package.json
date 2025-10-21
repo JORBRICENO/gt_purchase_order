@@ -81,7 +81,17 @@
         "kind": "odata-v2",
         "model": "srv/external/API_PRODUCT_SRV",
         "credentials": {
-          "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_PRODUCT_SRV",
+          "url": "http://s4h24.sap4practice.com:8024/sap/opu/odata/sap/API_PRODUCT_SRV",
+          "headers": {
+            "Authorization": "Basic amJyaWNlbm86TG9nYWxpLjIwMjQ="
+          }
+        }
+      },
+      "API_INFORECORD_PROCESS_SRV": {
+        "kind": "odata-v2",
+        "model": "srv/external/API_INFORECORD_PROCESS_SRV",
+        "credentials": {
+          "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap/API_INFORECORD_PROCESS_SRV",
           "headers": {
             "apikey": "MatGW3Mzcozw8FjoqggdaNAzYc7koHho"
           }

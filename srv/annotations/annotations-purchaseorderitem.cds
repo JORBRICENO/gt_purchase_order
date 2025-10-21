@@ -10,11 +10,11 @@ annotate PurchaseOrder.PurchaseOrderItem with {
     MaterialName               @title: 'Product Name';
     MaterialGroup              @title: 'Product Group';
     ProductType                @title: 'Product Type';
-    NetPriceQuantity           @title: 'Net Price Quantity'            @Measures.Unit       : OrderPriceUnit;
+    NetPriceQuantity           @title: 'Net Price Quantity'            @Measures.Unit       : OrderPriceUnit_code;
     OrderPriceUnit             @title: 'Order Quantity'                @Common.IsUnit;
     NetPriceAmount             @title: 'Net Price Amount'              @Measures.ISOCurrency: DocumentCurrency_code;
     DocumentCurrency           @title: 'Currency'                      @Common.IsCurrency;
-    OrderQuantity              @title: 'Order Quantity'                @Measures.Unit       : PurchaseOrderQuantityUnit;
+    OrderQuantity              @title: 'Order Quantity'                @Measures.Unit       : PurchaseOrderQuantityUnit_code;
     PurchaseOrderQuantityUnit  @title: 'Purchase Order Quantity Unit'  @Common.IsUnit;
     TaxCode                    @title: 'Tax Code';
 };
@@ -82,19 +82,19 @@ annotate PurchaseOrder.PurchaseOrderItem with {
                 ValueListProperty: 'ProductName'
             },
             {
-                $Type : 'Common.ValueListParameterOut',
-                LocalDataProperty : MaterialGroup,
-                ValueListProperty : 'ProductGroup'
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: MaterialGroup,
+                ValueListProperty: 'ProductGroup'
             },
             {
-                $Type : 'Common.ValueListParameterOut',
-                LocalDataProperty : ProductType,
-                ValueListProperty : 'ProductType'
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: ProductType,
+                ValueListProperty: 'ProductType'
             },
             {
-                $Type : 'Common.ValueListParameterOut',
-                LocalDataProperty : PurchaseOrderQuantityUnit,
-                ValueListProperty : 'PurchaseOrderQuantityUnit'
+                $Type            : 'Common.ValueListParameterOut',
+                LocalDataProperty: PurchaseOrderQuantityUnit,
+                ValueListProperty: 'PurchaseOrderQuantityUnit'
             }
         ]
     }}
@@ -102,6 +102,25 @@ annotate PurchaseOrder.PurchaseOrderItem with {
 
 
 annotate PurchaseOrder.PurchaseOrderItem with @(
+    Common.SideEffects: {
+        $Type : 'Common.SideEffectsType',
+        SourceProperties : [
+            'Material_Product',
+            'NetPriceAmount',
+            'NetPriceQuantity',
+            'OrderQuantity'
+        ],
+        TargetProperties : [
+            'NetPriceAmount',
+            'DocumentCurrency_code',
+            'NetPriceQuantity',
+            'PurchaseOrderQuantityUnit',
+            'TaxCode'
+        ],
+        TargetEntities : [
+            PurchaseOrder
+        ]
+    },
     UI.HeaderInfo                  : {
         $Type         : 'UI.HeaderInfoType',
         TypeName      : 'Item',
@@ -125,20 +144,40 @@ annotate PurchaseOrder.PurchaseOrderItem with @(
             }
         },
         {
+            $Type             : 'UI.DataField',
+            Value             : Plant_Plant,
+            @HTML5.CssDefaults: {
+                $Type: 'HTML5.CssDefaultsType',
+                width: '8rem'
+            }
+        },
+        {
             $Type: 'UI.DataField',
             Value: Material_Product
         },
         {
-            $Type             : 'UI.DataField',
-            Value             : MaterialGroup,
-            @HTML5.CssDefaults: {
-                $Type: 'HTML5.CssDefaultsType',
-                width: '12rem'
-            }
+            $Type: 'UI.DataField',
+            Value: MaterialName
         },
+        // {
+        //     $Type             : 'UI.DataField',
+        //     Value             : MaterialGroup,
+        //     @HTML5.CssDefaults: {
+        //         $Type: 'HTML5.CssDefaultsType',
+        //         width: '12rem'
+        //     }
+        // },
+        // {
+        //     $Type             : 'UI.DataField',
+        //     Value             : ProductType,
+        //     @HTML5.CssDefaults: {
+        //         $Type: 'HTML5.CssDefaultsType',
+        //         width: '12rem'
+        //     }
+        // },
         {
             $Type             : 'UI.DataField',
-            Value             : ProductType,
+            Value             : OrderQuantity,
             @HTML5.CssDefaults: {
                 $Type: 'HTML5.CssDefaultsType',
                 width: '12rem'
@@ -149,7 +188,7 @@ annotate PurchaseOrder.PurchaseOrderItem with @(
             Value             : NetPriceQuantity,
             @HTML5.CssDefaults: {
                 $Type: 'HTML5.CssDefaultsType',
-                width: '8rem'
+                width: '12rem'
             }
         },
         {
@@ -157,15 +196,7 @@ annotate PurchaseOrder.PurchaseOrderItem with @(
             Value             : NetPriceAmount,
             @HTML5.CssDefaults: {
                 $Type: 'HTML5.CssDefaultsType',
-                width: '8rem'
-            }
-        },
-        {
-            $Type             : 'UI.DataField',
-            Value             : OrderQuantity,
-            @HTML5.CssDefaults: {
-                $Type: 'HTML5.CssDefaultsType',
-                width: '8rem'
+                width: '12rem'
             }
         }
     ],

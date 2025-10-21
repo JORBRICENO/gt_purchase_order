@@ -33,6 +33,7 @@ entity PurchaseOrderHeader : cuid, managed {
         PurchaseOrderDate          : Date;
         DocumentCurrency           : Association to Currencies default 'USD'; //DocumentCurrency_code (EUR,USD,COP,VES,...)
         PurchasingProcessingStatus : Association to OverallStatus; //OverallStatus_code
+        TotalAmount                : Decimal    @Core.Immutable;
         // Category                   : Association to Categories;
         // SubCategory                : Association to SubCategories;
         to_PurchaseOrderItem       : Composition of many PurchaseOrderItem
@@ -50,12 +51,12 @@ entity PurchaseOrderItem : cuid {
         MaterialName              : String(40);
         MaterialGroup             : String(9);
         ProductType               : String(4);
-        NetPriceQuantity          : Decimal(12, 3);
-        OrderPriceUnit            : String(3);
-        NetPriceAmount            : Decimal(5, 0);
+        NetPriceQuantity          : Decimal;
+        OrderPriceUnit            : Association to Units;
+        NetPriceAmount            : Decimal;
         DocumentCurrency          : Association to Currencies;
-        OrderQuantity             : Decimal(13, 2);
-        PurchaseOrderQuantityUnit : String(3);
+        OrderQuantity             : Decimal;
+        PurchaseOrderQuantityUnit : Association to Units;
         TaxCode                   : String(2);
         PurchaseOrder             : Association to PurchaseOrderHeader; //PurchaseOrder_ID & PurchaseOrder_PurchaseOrder
 };
@@ -70,6 +71,10 @@ entity OverallStatus : CodeList {
         };
         criticality : Integer;
 };
+
+entity Units : CodeList {
+    key code : String(3);
+}
 
 // entity Companies : cuid {
 //     CompanyCode     : String(4);
