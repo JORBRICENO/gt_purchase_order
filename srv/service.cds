@@ -10,36 +10,42 @@ using {API_STORAGELOCATION_SRV as StorageLocation} from './external/API_STORAGEL
 using {API_PRODUCT_SRV as Product} from './external/API_PRODUCT_SRV';
 
 service PurchaseOrder {
+    entity PurchaseOrder          as projection on entitites.PurchaseOrderHeader
+        actions {
+            @Core.OperationAvailable: {
+                $edmJson: {
+                    $If: [
+                        {
+                            $Eq: [
+                                {
+                                    $Path: 'in/PurchasingProcessingStatus_code'
+                                },
+                                {
+                                    $String: 'A'
+                                }
+                            ]
+                        },
+                        true,
+                        false
+                    ]
+                }
+            }
+            @Common.SideEffects     : {
+                $Type         : 'Common.SideEffectsType',
+                TargetEntities: [
+                    in.PurchasingProcessingStatus
+                ]
+            }
+            action submitOrder(in: $self) returns PurchaseOrder;
+        };
 
-    entity PurchaseOrder     as projection on entitites.PurchaseOrderHeader;
-    entity PurchaseOrderItem as projection on entitites.PurchaseOrderItem;
-
-    /**Value Helps */
-    // @readonly
-    // entity VH_Suppliers      as projection on entitites.Suppliers;
-
-    // @readonly
-    // entity VH_Companies      as projection on entitites.Companies;
-
-    // @readonly
-    // entity VH_Organizations  as projection on entitites.Organizations;
-
-    // @readonly
-    // entity VH_OrderTypes     as projection on entitites.OrderTypes;
-
-    // @readonly
-    // entity VH_Groups         as projection on entitites.Groups
-    //                             order by
-    //                                 PurchasingGroup;
-
-    // entity VH_Categories as projection on entitites.Categories;
-
-    // entity VH_SubCategories as projection on entitites.SubCategories;
+    entity PurchaseOrderItem      as projection on entitites.PurchaseOrderItem;
 
     /** Value Helps - External */
+    
     @cds.persistence.exists
     @cds.persistence.skip
-    entity VHE_Companies     as
+    entity VHE_Companies          as
         projection on API_COMPANYCODE_SRV.A_CompanyCode {
             key CompanyCode,
                 CompanyCodeName,
@@ -50,7 +56,7 @@ service PurchaseOrder {
 
     @cds.persistence.exists
     @cds.persistence.skip
-    entity VHE_Organizations as
+    entity VHE_Organizations      as
         projection on Organization.A_PurchasingOrganization {
             key PurchasingOrganization,
                 PurchasingOrganizationName,
@@ -59,50 +65,57 @@ service PurchaseOrder {
 
     @cds.persistence.exists
     @cds.persistence.skip
-    entity VHE_Groups as projection on Group.A_PurchasingGroup {
-        key PurchasingGroup,
-            PurchasingGroupName
-    };
+    entity VHE_Groups             as
+        projection on Group.A_PurchasingGroup {
+            key PurchasingGroup,
+                PurchasingGroupName
+        };
 
     @cds.persistence.exists
     @cds.persistence.skip
-    entity VHE_Suppliers as projection on  BusinessPartner.A_Supplier {
-        key Supplier,
-            SupplierName,
-            to_SupplierPurchasingOrg.PurchasingOrganization as PurchasingOrganization
-    };
-    @cds.persistence.exists
-    @cds.persistence.skip
-    entity VHE_PurchaseOrderTypes as projection on PurchaseOrderType.PurchaseOrderType {
-        key PurchaseOrderType,
-            PurchaseOrderTypeName
-    }
+    entity VHE_Suppliers          as
+        projection on BusinessPartner.A_Supplier {
+            key Supplier,
+                SupplierName,
+                to_SupplierPurchasingOrg.PurchasingOrganization as PurchasingOrganization
+        };
 
     @cds.persistence.exists
     @cds.persistence.skip
-    entity VHE_Plants as projection on Plant.A_Plant {
-        key Plant,
-            PlantName,
-            CompanyCode,
-            CompanyCodeName
-    }
+    entity VHE_PurchaseOrderTypes as
+        projection on PurchaseOrderType.PurchaseOrderType {
+            key PurchaseOrderType,
+                PurchaseOrderTypeName
+        }
 
     @cds.persistence.exists
     @cds.persistence.skip
-    entity VHE_StorageLocation as projection on StorageLocation.StorageLocation {
-        key StorageLocation,
-            StorageLocationName,
-        key Plant
-    };
+    entity VHE_Plants             as
+        projection on Plant.A_Plant {
+            key Plant,
+                PlantName,
+                CompanyCode,
+                CompanyCodeName
+        }
 
     @cds.persistence.exists
     @cds.persistence.skip
-    entity VHE_Product as projection on Product.A_Product {
-        key Product,
-            to_Description.ProductDescription as ProductName,
-            ProductGroup,
-            ProductType,
-            to_ProductProcurement.PurchaseOrderQuantityUnit as PurchaseOrderQuantityUnit,
-            to_Plant.Plant as Plant
-    };
+    entity VHE_StorageLocation    as
+        projection on StorageLocation.StorageLocation {
+            key StorageLocation,
+                StorageLocationName,
+            key Plant
+        };
+
+    @cds.persistence.exists
+    @cds.persistence.skip
+    entity VHE_Product            as
+        projection on Product.A_Product {
+            key Product,
+                to_Description.ProductDescription               as ProductName,
+                ProductGroup,
+                ProductType,
+                to_ProductProcurement.PurchaseOrderQuantityUnit as PurchaseOrderQuantityUnit,
+                to_Plant.Plant                                  as Plant
+        };
 };

@@ -256,6 +256,12 @@ annotate pos.PurchaseOrder with @(
             $Type: 'UI.DataField',
             Value: TotalAmount,
         },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action: 'PurchaseOrder.submitOrder',
+            Label : 'Submit Order',
+            Inline: true
+        },
     ],
     UI.FieldGroup #OrganizationalData: {
         $Type: 'UI.FieldGroupType',

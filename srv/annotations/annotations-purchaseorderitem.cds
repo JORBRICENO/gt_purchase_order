@@ -109,7 +109,7 @@ annotate PurchaseOrder.PurchaseOrderItem with @(
             'NetPriceAmount',
             'NetPriceQuantity',
             'OrderQuantity',
-            'PurchaseOrderPriceUnit'
+            'PurchaseOrderQuantityUnit'
         ],
         TargetProperties: [
             'NetPriceAmount',

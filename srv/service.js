@@ -1,5 +1,7 @@
 const cds = require('@sap/cds');
 const moment = require('moment');
+const axios = require('axios');
+require('dotenv').config()
 
 module.exports = class PurchaseOrder extends cds.ApplicationService {
 
@@ -30,19 +32,13 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
 
         this.on('READ', VHE_Companies, async (req) => {
             return await api_company.tx(req).send({
-                query: req.query,
-                headers: {
-                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
-                }
+                query: req.query
             })
         });
 
         this.on('READ', VHE_Organizations, async (req) => {
             return await api_org.tx(req).send({
-                query: req.query,
-                headers: {
-                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
-                }
+                query: req.query
             })
         });
 
@@ -58,8 +54,6 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             if (!purchaseingOrg) {
                 return [];
             }
-
-            //1010
 
             const supplierQuery = SELECT.from('API_BUSINESS_PARTNER.A_SupplierPurchasingOrg')
                                 .columns('Supplier')
@@ -91,38 +85,25 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
 
         this.on('READ', VHE_Groups, async (req) => {
             return await api_group.tx(req).send({
-                query: req.query,
-                headers: {
-                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
-                }
+                query: req.query
             })
         });
 
         this.on('READ', VHE_PurchaseOrderTypes, async (req) => {
             return await api_purchordrtype.tx(req).send({
-                query: req.query,
-                headers: {
-                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjY='
-                }
+                query: req.query
             })
         });
 
         this.on('READ', VHE_Plants, async (req) => {
             return await api_plant.tx(req).send({
-                query: req.query,
-                headers: {
-                    apikey: 'MatGW3Mzcozw8FjoqggdaNAzYc7koHho'
-                    //Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjY='
-                }
+                query: req.query
             })
         });
 
         this.on('READ', VHE_StorageLocation, async (req) => {
             return await api_storageloc.tx(req).send({
-                query: req.query,
-                headers: {
-                    Authorization: 'Basic amJyaWNlbm86TG9nYWxpLjIwMjY='
-                }
+                query: req.query
             })
         });
 
@@ -385,17 +366,106 @@ module.exports = class PurchaseOrder extends cds.ApplicationService {
             }
         });
 
+        this.on('submitOrder', async (req) => {
+
+            let parent = req.params[0].ID;
+            const result = await SELECT.one.from(PurchaseOrder)
+                                .columns(po => {
+                                    po`.*`,
+                                    po.to_PurchaseOrderItem(item => {
+                                        item`.*`
+                                    })
+                                }).where({ID: parent});
+
+            const poDateTimestamp = new Date(result.PurchaseOrderDate + 'T00:00:00Z').getTime();
+
+            let payload = {
+                    "CompanyCode":result.CompanyCode_CompanyCode,
+                    "PurchasingOrganization": result.PurchasingOrganization_PurchasingOrganization,
+                    "PurchasingGroup":result.PurchasingGroup_PurchasingGroup,
+                    "Supplier":result.Supplier_Supplier,
+                    "PurchaseOrderType": result.PurchaseOrderType_PurchaseOrderType,
+                    "PurchaseOrderDate":`/Date(${poDateTimestamp})/`,
+                    "DocumentCurrency": result.DocumentCurrency_code,
+                    "to_PurchaseOrderItem": result.to_PurchaseOrderItem.map((item)=> ({
+                        "PurchaseOrderItem": item.PurchaseOrderItem,
+                        "Material": item.Material_Product,
+                        "Plant": item.Plant_Plant,
+                        ...(item.StorageLocation && {"StorageLocation": item.StorageLocation_StorageLocation}),
+                        ...(item.PurchaseOrderItemText && {"PurchaseOrderItemText": item.PurchaseOrderItemText}),
+                        ...(item.MaterialGroup && {"MaterialGroup": item.MaterialGroup}),
+                        ...(item.ProductType && {"ProductType": item.ProductType}),
+                        "OrderQuantity": String(item.OrderQuantity),
+                        "PurchaseOrderQuantityUnit" : item.PurchaseOrderQuantityUnit_code,
+                        "NetPriceAmount": String(item.NetPriceAmount),
+                        "NetPriceQuantity": String(item.NetPriceQuantity),
+                        "OrderPriceUnit": item.OrderPriceUnit_code,
+                        "TaxCode": item.TaxCode,
+                        "to_ScheduleLine":[
+                            {
+                                "ScheduleLine":"1",
+                                "ScheduleLineDeliveryDate": `/Date(${poDateTimestamp})/`,
+                                "ScheduleLineOrderQuantity": String(item.OrderQuantity)
+                            }
+                        ]
+                    }))
+            }
+
+            const serviceUrl = process.env.PURCHASE_ORDER_URL;
+            const postUrl = '/A_PurchaseOrder';
+            const basicAuth = process.env.AUTHORIZATION;
+
+            const service = axios.create({
+                baseURL: serviceUrl,
+                headers: {
+                    'Authorization': basicAuth
+                }
+            });
+
+            try {
+                // Obtenemos el token por medio del Fetch como les enseñe por Postman
+                const tokenResponse = await service.get(postUrl, { 
+                    headers: {
+                        'X-CSRF-Token': 'Fetch'
+                    }
+                });
+                
+                // Luego, guardamos el token y la cookie en una variable
+                const csrfToken = tokenResponse.headers['x-csrf-token'];
+                const cookies = tokenResponse.headers['set-cookie'];
+
+                // En caso de que no se tenga el token no se puede avanzar y retornamos un error
+                if (!csrfToken || !cookies) {
+                    throw new Error('No se pudo obtener el token CSRF o la cookie de sesión.');
+                }
+
+                //Por último, procedemos con hacer el envío del payload con el método post junto con el token y la cookie
+                await service.post(postUrl, payload, {
+                    headers: {
+                        'X-CSRF-Token': csrfToken,
+                        'Cookie': cookies.join('; ')
+                    }
+                }).then(async (response)=> {
+                    //Tras la creación del pedido de compra, es importante actualizar el status del mismo
+                    await UPDATE.entity(PurchaseOrder).set({PurchasingProcessingStatus_code: 'C'}).where({ID: parent});
+                    req.info(201,"El pedido de compra a sido realizado con éxito");
+                });
+
+                
+            } catch (error) {
+
+                console.error("Error en la llamada Axios:", error.message);
+                
+                if (error.response) {
+                    console.error("Detalle del error de SAP:", error.response.data);
+                }
+                
+                req.error(502, `Fallo al crear el pedido en S/4: ${error.message}`);
+            }
+
+        });
+
         return super.init();
     };
 
 };
-
-        //before
-        //on
-        //after
-
-        //Protocolo HTTP
-        //CREATE        --> NEW
-        //UPDATE
-        //DELETE
-        //READ
